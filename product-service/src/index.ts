@@ -2,6 +2,7 @@ import 'reflect-metadata';
 import express from 'express';
 import { Product } from './entity/Product';
 import { AppDataSource } from './ormconfig';
+import { authMiddleware, UserRequest } from './middleware/auth';
 
 const app = express();
 const port = process.env.PORT || 3002;
@@ -12,7 +13,7 @@ AppDataSource.initialize()
   .then(() => {
     const productRepository = AppDataSource.getRepository(Product);
 
-    app.post('/products', async (req, res) => {
+    app.post('/products', authMiddleware, async (req: UserRequest, res) => {
       const { name, description, price, category, imageUrl } = req.body;
       const product = new Product();
       product.name = name;
@@ -20,6 +21,9 @@ AppDataSource.initialize()
       product.price = price;
       product.category = category;
       product.imageUrl = imageUrl;
+      if (req.user?.id) {
+        product.userId = req.user.id;
+      }
 
       try {
         const savedProduct = await productRepository.save(product);
@@ -34,7 +38,9 @@ AppDataSource.initialize()
       const { name, description, price, category, imageUrl } = req.body;
 
       try {
-        const product = await productRepository.findOne({ where: { id: parseInt(id, 10) } });
+        const product = await productRepository.findOne({
+          where: { id: parseInt(id, 10) },
+        });
         if (!product) {
           return res.status(404).json({ error: 'Product not found' });
         }
@@ -56,7 +62,9 @@ AppDataSource.initialize()
       const { id } = req.params;
 
       try {
-        const product = await productRepository.findOne({ where: { id: parseInt(id, 10) } });
+        const product = await productRepository.findOne({
+          where: { id: parseInt(id, 10) },
+        });
         if (!product) {
           return res.status(404).json({ error: 'Product not found' });
         }
@@ -81,7 +89,9 @@ AppDataSource.initialize()
       const { id } = req.params;
 
       try {
-        const product = await productRepository.findOne({ where: { id: parseInt(id, 10) } });
+        const product = await productRepository.findOne({
+          where: { id: parseInt(id, 10) },
+        });
         if (!product) {
           return res.status(404).json({ error: 'Product not found' });
         }
@@ -95,4 +105,5 @@ AppDataSource.initialize()
     app.listen(port, () => {
       console.log(`Product service listening on port ${port}`);
     });
-  }).catch(error => console.log(error));
+  })
+  .catch((error) => console.log(error));
