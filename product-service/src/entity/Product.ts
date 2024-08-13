@@ -15,8 +15,11 @@ export class Product {
   price!: number;
 
   @Column()
-  category!: string;
+  category?: string;
 
   @Column()
-  imageUrl!: string;
+  imageUrl?: string;
+
+  @Column('decimal', { precision: 3, scale: 1 })
+  rating?: number;
 }
