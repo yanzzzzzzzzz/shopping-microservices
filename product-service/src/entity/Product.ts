@@ -1,7 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
 export class Product {
+  constructor() {
+    this.description = '';
+    this.rating = 0;
+    this.imageUrl = '';
+    this.category = '';
+  }
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -9,17 +15,17 @@ export class Product {
   name!: string;
 
   @Column()
-  description!: string;
+  description: string;
 
-  @Column("decimal")
+  @Column('decimal')
   price!: number;
 
   @Column()
-  category?: string;
+  category: string;
 
   @Column()
-  imageUrl?: string;
+  imageUrl: string;
 
   @Column('decimal', { precision: 3, scale: 1 })
-  rating?: number;
+  rating: number;
 }
