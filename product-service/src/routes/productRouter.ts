@@ -73,24 +73,15 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const { name, description, price, category, imageUrl } = req.body;
 
   try {
     const product = await productRepository.findOne({ where: { id: parseInt(id, 10) } });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-
-    product.name = name;
-    product.description = description;
-    product.price = price;
-    product.category = category;
-    product.imageUrl = imageUrl;
-
-    const updatedProduct = await productRepository.save(product);
-    res.status(200).json(updatedProduct);
+    res.status(200).json(product);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update product' });
+    res.status(500).json({ error: 'Failed to get product' });
   }
 });
 
