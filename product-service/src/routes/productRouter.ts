@@ -1,9 +1,13 @@
 import express from 'express';
 import { Product } from '../entity/Product';
+import { ProductVariant } from '../entity/ProductVariant';
 import { AppDataSource } from '../ormconfig';
 
+import { ProductSpecification } from '../entity/ProductSpecification';
 const router = express.Router();
 const productRepository = AppDataSource.getRepository(Product);
+const productVariantRepository = AppDataSource.getRepository(ProductVariant);
+const productSpecificationRepository = AppDataSource.getRepository(ProductSpecification);
 
 router.post('/', async (req, res) => {
   const { name, description, price, category, imageUrl, rating } = req.body;
@@ -73,13 +77,22 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
-
+  const productId = parseInt(id, 10);
   try {
-    const product = await productRepository.findOne({ where: { id: parseInt(id, 10) } });
+    const product = await productRepository.findOne({ where: { id: productId } });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    res.status(200).json(product);
+    const variant = await productVariantRepository.find({ where: { productId: productId } });
+    const spec = await productSpecificationRepository.find({
+      where: { productId: productId },
+      relations: ['specification'],
+    });
+    res.status(200).json({
+      product,
+      variant,
+      spec,
+    });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get product' });
   }
