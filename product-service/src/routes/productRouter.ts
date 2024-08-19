@@ -75,6 +75,24 @@ router.get('/', async (req, res) => {
   }
 });
 
+const mapProduct = (product: Product) => {
+  const { id, ...productData } = product;
+  return productData;
+};
+
+const mapVariant = (variant: ProductVariant) => {
+  const { id, productId, ...variantData } = variant;
+  return variantData;
+};
+
+const mapSpec = (spec: ProductSpecification) => {
+  const { id, productId, specId, specification, ...specData } = spec;
+  return {
+    ...specData,
+    name: specification ? specification.name : null,
+  };
+};
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   const productId = parseInt(id, 10);
@@ -83,15 +101,16 @@ router.get('/:id', async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    const variant = await productVariantRepository.find({ where: { productId: productId } });
-    const spec = await productSpecificationRepository.find({
+    const variants = await productVariantRepository.find({ where: { productId: productId } });
+    const specs = await productSpecificationRepository.find({
       where: { productId: productId },
       relations: ['specification'],
     });
+
     res.status(200).json({
-      product,
-      variant,
-      spec,
+      product: mapProduct(product),
+      variants: variants.map(mapVariant),
+      specs: specs.map(mapSpec),
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to get product' });
