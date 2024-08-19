@@ -4,6 +4,8 @@ import { ProductVariant } from '../entity/ProductVariant';
 import { AppDataSource } from '../ormconfig';
 
 import { ProductSpecification } from '../entity/ProductSpecification';
+import { mapProduct, mapVariant, mapSpec } from '../utils/mappers';
+
 const router = express.Router();
 const productRepository = AppDataSource.getRepository(Product);
 const productVariantRepository = AppDataSource.getRepository(ProductVariant);
@@ -74,24 +76,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
-
-const mapProduct = (product: Product) => {
-  const { id, ...productData } = product;
-  return productData;
-};
-
-const mapVariant = (variant: ProductVariant) => {
-  const { id, productId, ...variantData } = variant;
-  return variantData;
-};
-
-const mapSpec = (spec: ProductSpecification) => {
-  const { id, productId, specId, specification, ...specData } = spec;
-  return {
-    ...specData,
-    name: specification ? specification.name : null,
-  };
-};
 
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
