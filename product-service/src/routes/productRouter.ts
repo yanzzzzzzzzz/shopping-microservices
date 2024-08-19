@@ -5,7 +5,7 @@ import { AppDataSource } from '../ormconfig';
 
 import { ProductSpecification } from '../entity/ProductSpecification';
 import { mapProduct, mapVariant, mapSpec } from '../utils/mappers';
-
+import { ILike, Between } from 'typeorm';
 const router = express.Router();
 const productRepository = AppDataSource.getRepository(Product);
 const productVariantRepository = AppDataSource.getRepository(ProductVariant);
@@ -70,7 +70,21 @@ router.delete('/:id', async (req, res) => {
 
 router.get('/', async (req, res) => {
   try {
-    const products = await productRepository.find();
+    const { keyword, maxPrice, minPrice } = req.query;
+    let whereClause: any = {};
+    if (keyword) {
+      whereClause.name = ILike(`%${keyword}%`);
+    }
+
+    if (minPrice || maxPrice) {
+      whereClause.price = Between(
+        minPrice ? parseInt(minPrice as string, 10) : 0,
+        maxPrice ? parseInt(maxPrice as string, 10) : Number.MAX_SAFE_INTEGER
+      );
+    }
+    const products = await productRepository.find({
+      where: whereClause,
+    });
     res.status(200).json(products);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch products' });
