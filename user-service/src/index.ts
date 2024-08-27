@@ -10,7 +10,7 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 app.use(express.json());
-app.use('/', userRoutes);
+app.use('/user', userRoutes);
 
 AppDataSource.initialize()
   .then(() => {
@@ -18,6 +18,6 @@ AppDataSource.initialize()
       console.log(`User service listening on port ${port}`);
     });
   })
-  .catch((err) => {
-    console.error("Error during Data Source initialization:", err);
+  .catch(err => {
+    console.error('Error during Data Source initialization:', err);
   });
