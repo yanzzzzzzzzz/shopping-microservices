@@ -19,7 +19,8 @@ router.post('/register', async (req, res) => {
 
   try {
     const savedUser = await userRepository.save(user);
-    res.status(201).json(savedUser);
+    const token = generateToken(savedUser.id);
+    res.status(201).json({ token: token });
   } catch (err) {
     res.status(500).json({ error: 'User registration failed' });
   }
