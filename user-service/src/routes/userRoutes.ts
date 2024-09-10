@@ -10,6 +10,20 @@ const router = Router();
 
 router.post('/register', async (req, res) => {
   const { username, password, email } = req.body;
+
+  if (!username || !password || !email) {
+    return res.status(400).json({ error: 'Username, password, and email are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+  }
+
+  const existingUser = await userRepository.findOne({ where: [{ username }, { email }] });
+  if (existingUser) {
+    return res.status(400).json({ error: 'Username or email already exists' });
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = new User();
