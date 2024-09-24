@@ -61,7 +61,7 @@ router.get('/profile', authMiddleware, async (req: UserRequest, res) => {
   try {
     const user = await userRepository.findOne({
       where: { id: req.user?.id },
-      select: ['username', 'email'],
+      select: ['username', 'email', 'id'],
     });
     if (user) {
       res.status(200).json(user);

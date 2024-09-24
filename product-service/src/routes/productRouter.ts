@@ -104,10 +104,11 @@ router.get('/:id', async (req, res) => {
       where: { productId: productId },
       relations: ['specification'],
     });
+    console.log('variants', variants);
 
     res.status(200).json({
       product: mapProduct(product),
-      variants: variants.map(mapVariant),
+      variants: variants,
       specs: specs.map(mapSpec),
     });
   } catch (err) {
