@@ -2,6 +2,8 @@ import express from 'express';
 import { ShoppingCart } from '../entity/shopppingCart';
 import { AppDataSource } from '../ormconfig';
 import { getProductInfo } from '../services/productService';
+import { getUserInfo } from '../services/userService';
+import { Repository } from 'typeorm';
 const router = express.Router();
 const repository = AppDataSource.getRepository(ShoppingCart);
 
@@ -36,5 +38,27 @@ router.get('/:userId', async (req, res) => {
 
     res.status(200).json(enrichedCartList);
   } catch (error) {}
+});
+
+router.delete('/:cartId', async (req, res) => {
+  const { cartId } = req.params;
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (token == null) {
+      throw new Error('token is null');
+    }
+    const userInfo = await getUserInfo(token);
+    const cartItem = await repository.findOne({ where: { id: parseInt(cartId) } });
+    if (cartItem == null) {
+      throw new Error('shopping cart item not found');
+    }
+    if (cartItem.userId !== userInfo.id) {
+      throw new Error('no permission');
+    }
+    await repository.delete(cartItem.id);
+    res.status(204).send();
+  } catch (error: any) {
+    res.status(500).json({ error: `Failed to delete shopping cart item:${error.message}` });
+  }
 });
 export default router;
