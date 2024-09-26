@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
 
   try {
     const savedUser = await userRepository.save(user);
-    const token = generateToken(savedUser.id);
+    const token = generateToken(savedUser);
     res.status(201).json({ token: token });
   } catch (err) {
     res.status(500).json({ error: 'User registration failed' });
@@ -47,7 +47,7 @@ router.post('/login', async (req, res) => {
     const user = await userRepository.findOne({ where: { username } });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const token = generateToken(user.id);
+      const token = generateToken(user);
       res.status(200).json({ message: 'Login successful', token });
     } else {
       res.status(401).json({ error: 'Invalid username or password' });
