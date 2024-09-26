@@ -1,11 +1,11 @@
-import jwt from "jsonwebtoken";
-import * as dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
+import * as dotenv from 'dotenv';
 dotenv.config();
 
-const SECRET_KEY = process.env.SECRET_KEY || "default-secret-key";
+const SECRET_KEY = process.env.SECRET_KEY || 'default-secret-key';
 
 export const generateToken = (userId: number) => {
-  return jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: "1h" });
+  return jwt.sign({ id: userId }, SECRET_KEY, { expiresIn: '1h' });
 };
 
 export const verifyToken = (token: string): { id: number } | null => {
