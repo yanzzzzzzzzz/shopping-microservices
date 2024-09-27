@@ -2,8 +2,7 @@ import express from 'express';
 import { ShoppingCart } from '../entity/shopppingCart';
 import { AppDataSource } from '../ormconfig';
 import { getProductInfo } from '../services/productService';
-import { getUserInfo } from '../services/userService';
-import { Repository } from 'typeorm';
+import { authMiddleware, UserRequest } from '../middleware/auth';
 const router = express.Router();
 const repository = AppDataSource.getRepository(ShoppingCart);
 
@@ -40,19 +39,20 @@ router.get('/:userId', async (req, res) => {
   } catch (error) {}
 });
 
-router.delete('/:cartId', async (req, res) => {
+router.delete('/:cartId', authMiddleware, async (req: UserRequest, res) => {
   const { cartId } = req.params;
   try {
     const token = req.headers.authorization?.split(' ')[1];
     if (token == null) {
       throw new Error('token is null');
     }
-    const userInfo = await getUserInfo(token);
     const cartItem = await repository.findOne({ where: { id: parseInt(cartId) } });
     if (cartItem == null) {
       throw new Error('shopping cart item not found');
     }
-    if (cartItem.userId !== userInfo.id) {
+    console.log('req.user', req.user);
+
+    if (cartItem.userId !== req.user?.id) {
       throw new Error('no permission');
     }
     await repository.delete(cartItem.id);
