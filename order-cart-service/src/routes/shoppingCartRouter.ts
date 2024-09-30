@@ -6,10 +6,26 @@ import { authMiddleware, UserRequest } from '../middleware/auth';
 const router = express.Router();
 const repository = AppDataSource.getRepository(ShoppingCart);
 
-router.post('/', async (req, res) => {
-  const item = req.body;
-  const newRecord = repository.create(item);
+router.post('/', authMiddleware, async (req: UserRequest, res) => {
+  if (req.user?.id == null) {
+    return res.status(500).json({ error: 'user not found' });
+  }
 
+  const existingItem = await repository.findOne({
+    where: {
+      userId: req.user?.id,
+      productId: req.body.productId,
+      productVariantId: req.body.productVariantId,
+    },
+  });
+
+  if (existingItem) {
+    existingItem.amount += req.body.amount;
+    await repository.save(existingItem);
+    return res.status(200).json(existingItem);
+  }
+
+  const newRecord = repository.create({ ...req.body, userId: req.user?.id });
   try {
     const savedResult = await repository.save(newRecord);
     res.status(201).json(savedResult);
@@ -34,6 +50,7 @@ router.get('/:userId', async (req, res) => {
       };
     });
     const enrichedCartList = await Promise.all(productPromises);
+    console.log('enrichedCartList', enrichedCartList);
 
     res.status(200).json(enrichedCartList);
   } catch (error) {}
