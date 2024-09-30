@@ -107,7 +107,7 @@ router.get('/:id', async (req, res) => {
     console.log('variants', variants);
 
     res.status(200).json({
-      product: mapProduct(product),
+      product: product,
       variants: variants,
       specs: specs.map(mapSpec),
     });
