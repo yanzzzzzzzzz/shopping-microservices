@@ -78,4 +78,26 @@ router.delete('/:cartId', authMiddleware, async (req: UserRequest, res) => {
     res.status(500).json({ error: `Failed to delete shopping cart item:${error.message}` });
   }
 });
+router.put('/:cartId', authMiddleware, async (req: UserRequest, res) => {
+  const { cartId } = req.params;
+  const { amount } = req.body;
+  try {
+    const cartItem = await repository
+      .createQueryBuilder('cart')
+      .where('id = :id', { id: cartId })
+      .getOne();
+
+    if (cartItem == null) {
+      throw new Error('shopping cart item not found');
+    }
+    if (cartItem.userId !== req.user?.id) {
+      throw new Error('no permission');
+    }
+    cartItem.amount = amount;
+    await repository.save(cartItem);
+    return res.status(200).json(cartItem);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
 export default router;
