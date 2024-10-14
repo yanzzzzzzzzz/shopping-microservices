@@ -11,21 +11,24 @@ export const authMiddleware: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  console.log('token', token);
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    console.log('token', token);
+    if (token == null) {
+      next();
+      return;
+    }
 
-  if (token == null) {
+    const decoded = await getUserInfo(token);
+    console.log('decoded', decoded);
+    if (!decoded) {
+      next();
+      return;
+    }
+
+    req.user = { id: decoded.id };
     next();
-    return;
-  }
-
-  const decoded = await getUserInfo(token);
-  console.log('decoded', decoded);
-  if (!decoded) {
+  } catch (error) {
     next();
-    return;
   }
-
-  req.user = { id: decoded.id };
-  next();
 };
