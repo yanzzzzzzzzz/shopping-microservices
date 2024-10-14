@@ -37,7 +37,11 @@ router.post('/', authMiddleware, async (req: UserRequest, res) => {
 router.get('/:userId', async (req, res) => {
   const { userId } = req.params;
   try {
-    const shoppingCartList = await repository.find({ where: { userId: parseInt(userId, 10) } });
+    const shoppingCartList = await repository
+      .createQueryBuilder('cart')
+      .where('cart.userId = :userId ', { userId })
+      .orderBy('cart.id', 'ASC')
+      .getMany();
     const productPromises = shoppingCartList.map(async item => {
       const productInfo = await getProductInfo(item.productId);
       const variant = productInfo.variants.find(variant => variant.id === item.productVariantId);
@@ -53,7 +57,9 @@ router.get('/:userId', async (req, res) => {
     console.log('enrichedCartList', enrichedCartList);
 
     res.status(200).json(enrichedCartList);
-  } catch (error) {}
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 router.delete('/:cartId', authMiddleware, async (req: UserRequest, res) => {
