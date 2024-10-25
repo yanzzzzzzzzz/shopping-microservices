@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import express from 'express';
 import { AppDataSource } from './ormconfig';
-import cartRouter from './routes/shoppingCartRouter';
+import cartRouter from './routes/shoppingCartRoutes';
 const app = express();
 const port = process.env.PORT || 3002;
 
