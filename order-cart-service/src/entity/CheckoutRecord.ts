@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { CheckoutItem } from './CheckoutItem';
 
 @Entity('checkout_records')
 export class CheckoutRecord {
@@ -43,4 +44,10 @@ export class CheckoutRecord {
 
   @Column({ type: 'varchar', length: 50 })
   paymentStatus!: string;
+
+  @Column()
+  userId!: number;
+
+  @OneToMany(() => CheckoutItem, checkoutItem => checkoutItem.checkoutRecord)
+  items!: CheckoutItem[];
 }
