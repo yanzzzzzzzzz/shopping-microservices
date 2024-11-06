@@ -3,7 +3,7 @@ import { AppDataSource } from '../ormconfig';
 import { CheckoutRecord } from '../entity/CheckoutRecord';
 import { CheckoutItem } from '../entity/CheckoutItem';
 import { authMiddleware, UserRequest } from '../middleware/auth';
-
+import { ShoppingCart } from '../entity/shopppingCart';
 const router = Router();
 
 router.post('/', authMiddleware, async (req: UserRequest, res) => {
@@ -14,10 +14,23 @@ router.post('/', authMiddleware, async (req: UserRequest, res) => {
   try {
     const { shippingAddress, totalAmount, shippingFee, couponUsed, paymentMethod, items } =
       req.body;
-    if (items == null) {
-      res.status(500).json({ error: 'checkout item not found' });
-      return;
+
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: 'Checkout items not found' });
     }
+
+    for (const item of items) {
+      const shoppingCart = await queryRunner.manager.findOne(ShoppingCart, {
+        where: { id: item.cartId },
+      });
+
+      if (!shoppingCart) {
+        return res.status(404).json({ message: 'Shopping cart not found' });
+      }
+
+      await queryRunner.manager.delete(ShoppingCart, shoppingCart);
+    }
+
     const nowISO = new Date().toISOString();
 
     const checkoutRecord = queryRunner.manager.create(CheckoutRecord, {
@@ -51,7 +64,7 @@ router.post('/', authMiddleware, async (req: UserRequest, res) => {
 
     await queryRunner.commitTransaction();
     res.json(savedCheckoutRecord);
-  } catch (error) {
+  } catch (error: any) {
     await queryRunner.rollbackTransaction();
     res.status(500).json({ message: 'Error creating checkout record', error });
   } finally {
