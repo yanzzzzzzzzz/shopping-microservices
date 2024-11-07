@@ -57,14 +57,14 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/profile', authMiddleware, async (req: UserRequest, res) => {
+router.get('', authMiddleware, async (req: UserRequest, res) => {
   try {
     const user = await userRepository.findOne({
       where: { id: req.user?.id },
-      select: ['username', 'email', 'id'],
     });
     if (user) {
-      res.status(200).json(user);
+      const { password, ...userWithoutPassword } = user;
+      res.status(200).json(userWithoutPassword);
     } else {
       res.status(404).json({ error: 'user not found' });
     }

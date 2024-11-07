@@ -5,7 +5,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ unique: true })
+  @Column({ unique: true }) // account name
   username!: string;
 
   @Column()
@@ -16,4 +16,18 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ type: 'char', nullable: true })
+  sex?: 'M' | 'F' | 'OTHER';
+
+  @Column({ type: 'date', nullable: true })
+  birthday?: Date;
+
+  @Column({ name: 'imageUrl', nullable: true })
+  imageUrl?: string;
+
+  @Column({ nullable: true }) //user personal name
+  name?: string;
 }
