@@ -77,4 +77,31 @@ router.get('/checkToken', authMiddleware, async (req, res) => {
   res.status(200).json({ message: 'Token is valid' });
 });
 
+router.put('', authMiddleware, async (req: UserRequest, res) => {
+  const { email, phone, sex, birthday, imageUrl, name } = req.body;
+  const userId = req.user?.id;
+
+  try {
+    const user = await userRepository.findOne({ where: { id: userId } });
+
+    if (user) {
+      user.email = email;
+      user.phone = phone;
+      user.sex = sex;
+      user.birthday = birthday;
+      user.imageUrl = imageUrl;
+      user.name = name;
+
+      await userRepository.save(user);
+      res.status(200).json({ message: 'User info updated successfully' });
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.log('error', error);
+
+    res.status(500).json({ error: 'Failed to update user info' + error });
+  }
+});
+
 export default router;

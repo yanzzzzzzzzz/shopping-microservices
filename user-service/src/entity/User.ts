@@ -20,7 +20,7 @@ export class User {
   phone?: string;
 
   @Column({ type: 'char', nullable: true })
-  sex?: 'M' | 'F' | 'OTHER';
+  sex?: 'M' | 'F' | 'O';
 
   @Column({ type: 'date', nullable: true })
   birthday?: Date;
