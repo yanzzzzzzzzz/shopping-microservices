@@ -66,5 +66,21 @@ const uploadImageToImgur = async (imagePath: string) => {
     deleteHash: response.data.data.deletehash,
   };
 };
+router.get('/:id', async (req, res) => {
+  console.log('get image');
 
+  const { id } = req.params;
+  try {
+    const imgurImage = await ImgurImageRepository.findOne({
+      where: { id: parseInt(id, 10) },
+    });
+    if (!imgurImage) {
+      return res.status(404).json({ error: '圖片不存在' });
+    }
+    res.json(imgurImage);
+  } catch (error) {
+    console.error('獲取圖片失敗:', error);
+    res.status(500).json({ error: '獲取圖片失敗' });
+  }
+});
 export default router;

@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3004;
 
 app.use(express.json());
-app.use('/', imgurRoutes);
+app.use('/image', imgurRoutes);
 
 AppDataSource.initialize()
   .then(() => {
