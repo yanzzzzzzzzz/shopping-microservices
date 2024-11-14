@@ -78,7 +78,7 @@ router.get('/checkToken', authMiddleware, async (req, res) => {
 });
 
 router.put('', authMiddleware, async (req: UserRequest, res) => {
-  const { email, phone, sex, birthday, imageUrl, name } = req.body;
+  const { email, phone, sex, birthday, imageId, name } = req.body;
   const userId = req.user?.id;
 
   try {
@@ -89,7 +89,7 @@ router.put('', authMiddleware, async (req: UserRequest, res) => {
       user.phone = phone;
       user.sex = sex;
       user.birthday = birthday;
-      user.imageUrl = imageUrl;
+      user.imageId = imageId;
       user.name = name;
 
       await userRepository.save(user);

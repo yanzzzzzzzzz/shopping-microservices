@@ -26,7 +26,7 @@ export class User {
   birthday?: Date;
 
   @Column({ name: 'imageUrl', nullable: true })
-  imageUrl?: string;
+  imageId?: number;
 
   @Column({ nullable: true }) //user personal name
   name?: string;
