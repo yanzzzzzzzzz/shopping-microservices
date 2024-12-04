@@ -23,4 +23,8 @@ export class CheckoutItem {
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   totalAmount!: number;
+  @Column({ type: 'varchar', length: 5000, nullable: true })
+  productName!: string | null;
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  variantName!: string | null;
 }

@@ -4,7 +4,9 @@ import { CheckoutRecord } from '../entity/CheckoutRecord';
 import { CheckoutItem } from '../entity/CheckoutItem';
 import { authMiddleware, UserRequest } from '../middleware/auth';
 import { ShoppingCart } from '../entity/shopppingCart';
+
 const router = Router();
+const checkoutRepository = AppDataSource.getRepository(CheckoutRecord);
 
 router.post('/', authMiddleware, async (req: UserRequest, res) => {
   const queryRunner = AppDataSource.createQueryRunner();
@@ -74,7 +76,6 @@ router.post('/', authMiddleware, async (req: UserRequest, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const checkoutRepository = AppDataSource.getRepository(CheckoutRecord);
     const record = await checkoutRepository.findOneBy({ id: parseInt(req.params.id) });
     if (!record) {
       res.status(404).json({ message: 'Checkout record not found' });
@@ -86,4 +87,21 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.get('/', authMiddleware, async (req: UserRequest, res) => {
+  try {
+    console.log('get list');
+    console.log('req.user', req.user);
+
+    if (!req.user) {
+      return res.status(401).send('Unauthorized');
+    }
+    const userId = req.user!.id;
+    const recordsWithItems = await checkoutRepository.find({
+      where: { userId: Number(userId) },
+      relations: ['items'],
+    });
+
+    return res.json(recordsWithItems);
+  } catch (error) {}
+});
 export default router;

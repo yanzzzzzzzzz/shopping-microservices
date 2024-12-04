@@ -13,14 +13,12 @@ export const authMiddleware: RequestHandler = async (
 ) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
-    console.log('token', token);
-    if (token == null) {
+    if (!token) {
       next();
       return;
     }
 
     const decoded = await getUserInfo(token);
-    console.log('decoded', decoded);
     if (!decoded) {
       next();
       return;
@@ -29,6 +27,7 @@ export const authMiddleware: RequestHandler = async (
     req.user = { id: decoded.id };
     next();
   } catch (error) {
+    return res.status(401).send('auth error');
     next();
   }
 };
