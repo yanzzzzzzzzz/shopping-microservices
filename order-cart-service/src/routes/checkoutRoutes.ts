@@ -4,7 +4,8 @@ import { CheckoutRecord } from '../entity/CheckoutRecord';
 import { CheckoutItem } from '../entity/CheckoutItem';
 import { authMiddleware, UserRequest } from '../middleware/auth';
 import { ShoppingCart } from '../entity/shopppingCart';
-
+import { getImageList } from '../services/imageService';
+import { CheckoutItemWithImageUrl } from '../model/CheckoutItem';
 const router = Router();
 const checkoutRepository = AppDataSource.getRepository(CheckoutRecord);
 
@@ -101,7 +102,38 @@ router.get('/', authMiddleware, async (req: UserRequest, res) => {
       relations: ['items'],
     });
 
+    const imageIds = recordsWithItems.flatMap(record =>
+      record.items.filter(item => item.imageId !== null).map(item => item.imageId)
+    );
+    if (imageIds.length === 0) {
+      return res.json(recordsWithItems);
+    }
+    const validImageIds: number[] = [
+      ...new Set(imageIds.filter((id): id is number => id !== null)),
+    ];
+    console.log('validImageIds', validImageIds);
+
+    const imageResponse: any = await getImageList(validImageIds);
+    console.log('imageResponse', imageResponse);
+
+    if (imageResponse.status !== 200) {
+      return res.status(imageResponse.status).json({
+        message: 'Failed to fetch images from Image Service.',
+      });
+    }
+    const imageMap = imageResponse.data;
+    recordsWithItems.forEach(record => {
+      record.items.forEach(item => {
+        const extendedItem = item as CheckoutItemWithImageUrl;
+        if (item.imageId && imageMap[item.imageId]) {
+          extendedItem.imageUrl = imageMap[item.imageId];
+        }
+      });
+    });
     return res.json(recordsWithItems);
-  } catch (error) {}
+  } catch (error) {
+    console.error('Error fetching checkout records or images:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
 });
 export default router;

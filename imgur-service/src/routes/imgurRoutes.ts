@@ -6,6 +6,7 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import FormData from 'form-data';
+import { In } from 'typeorm';
 
 const ImgurImageRepository = AppDataSource.getRepository(ImgurImage);
 const router = Router();
@@ -108,6 +109,33 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     console.error('獲取圖片失敗:', error);
     res.status(500).json({ error: '獲取圖片失敗' });
+  }
+});
+router.post('/', async (req, res) => {
+  const { imageIds } = req.body;
+  console.log('imageIds', imageIds);
+
+  // 驗證請求
+  if (!Array.isArray(imageIds) || imageIds.length === 0) {
+    return res.status(400).json({ message: 'Invalid or empty imageIds provided.' });
+  }
+  try {
+    const images = await ImgurImageRepository.findBy({
+      id: In(imageIds),
+    });
+    const imageMap = images.reduce((acc, image) => {
+      acc[image.id] = image.imageUrl;
+      return acc;
+    }, {} as Record<number, string>);
+
+    const result = imageIds.reduce((acc, id) => {
+      acc[id] = imageMap[id] || null;
+      return acc;
+    }, {} as Record<number, string | null>);
+    res.json(result);
+  } catch (error) {
+    console.error('Error fetching images:', error);
+    res.status(500).json({ message: 'Internal server error.' });
   }
 });
 export default router;

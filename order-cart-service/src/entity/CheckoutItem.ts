@@ -27,4 +27,6 @@ export class CheckoutItem {
   productName!: string | null;
   @Column({ type: 'varchar', length: 500, nullable: true })
   variantName!: string | null;
+  @Column({ type: 'int', nullable: true })
+  imageId!: number | null;
 }

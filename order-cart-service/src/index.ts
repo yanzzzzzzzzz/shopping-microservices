@@ -10,7 +10,7 @@ app.use(express.json());
 
 AppDataSource.initialize()
   .then(() => {
-    app.use('/cart/checkout', checkoutRoutes);
+    app.use('/checkout', checkoutRoutes);
     app.use('/cart', cartRouter);
     app.listen(port, () => {
       console.log(`Product service listening on port ${port}`);
