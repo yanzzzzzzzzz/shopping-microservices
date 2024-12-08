@@ -5,7 +5,6 @@ export class Product {
   constructor() {
     this.description = '';
     this.rating = 0;
-    this.imageUrl = '';
     this.category = '';
   }
   @PrimaryGeneratedColumn()
@@ -23,9 +22,8 @@ export class Product {
   @Column()
   category: string;
 
-  @Column()
-  imageUrl: string;
-
   @Column('decimal', { precision: 3, scale: 1 })
   rating: number;
+  @Column('integer')
+  imageId!: number;
 }

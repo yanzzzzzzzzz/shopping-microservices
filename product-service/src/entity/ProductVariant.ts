@@ -19,4 +19,6 @@ export class ProductVariant {
 
   @Column('int')
   inventory!: number;
+  @Column('integer')
+  imageId!: number;
 }
