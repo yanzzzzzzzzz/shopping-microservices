@@ -6,6 +6,8 @@ import { authMiddleware, UserRequest } from '../middleware/auth';
 import { ShoppingCart } from '../entity/shopppingCart';
 import { getImageList } from '../services/imageService';
 import { CheckoutItemWithImageUrl } from '../model/CheckoutItem';
+import { getProductVariant } from '../services/productService';
+import { Variant } from '../model/Product';
 const router = Router();
 const checkoutRepository = AppDataSource.getRepository(CheckoutRecord);
 
@@ -51,18 +53,28 @@ router.post('/', authMiddleware, async (req: UserRequest, res) => {
     });
 
     const savedCheckoutRecord = await queryRunner.manager.save(checkoutRecord);
-
-    const checkoutItems = items.map((item: any) =>
-      queryRunner.manager.create(CheckoutItem, {
+    let checkoutItems: CheckoutItem[] = [];
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index];
+      const response: any = await getProductVariant(item.productId, item.productVariantId);
+      console.log('response', response);
+      if (response.status !== 200) {
+        throw new Error('status error');
+      }
+      const variantData: Variant = response.data;
+      const checkoutItem = queryRunner.manager.create(CheckoutItem, {
         productId: item.productId,
         productVariantId: item.productVariantId,
         quantity: item.quantity,
         price: item.price,
         totalAmount: item.totalAmount,
         checkoutRecord: savedCheckoutRecord,
-      })
-    );
-
+        imageId: variantData.imageId,
+        productName: item.productName,
+        variantName: variantData.variantName,
+      });
+      checkoutItems.push(checkoutItem);
+    }
     await queryRunner.manager.save(checkoutItems);
 
     await queryRunner.commitTransaction();

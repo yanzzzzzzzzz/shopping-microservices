@@ -47,10 +47,11 @@ router.get('/:userId', async (req, res) => {
       const variant = productInfo.variants.find(variant => variant.id === item.productVariantId);
       return {
         ...item,
-        imageUrl: productInfo.product.imageUrl,
+        imageUrl: variant?.imageUrl || productInfo.product.imageUrl,
         name: productInfo.product.name,
         price: variant?.price,
         variantName: variant?.variantName,
+        imageId: variant?.imageId || productInfo.product.imageId,
       };
     });
     const enrichedCartList = await Promise.all(productPromises);

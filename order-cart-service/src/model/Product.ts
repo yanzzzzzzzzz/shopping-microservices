@@ -6,19 +6,22 @@ export interface Product {
   category: string;
   imageUrl: string;
   rating: number;
+  imageId: number;
 }
 
-export interface Variants {
+export interface Variant {
   variantName: string;
   price: number;
   inventory: number;
   id: number;
   productId: number;
+  imageId: number;
+  imageUrl: string;
 }
 
 export interface ProductModel {
   product: Product;
-  variants: Variants[];
+  variants: Variant[];
   specs: Specs[];
 }
 export interface Specs {

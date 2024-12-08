@@ -6,7 +6,7 @@ import { AppDataSource } from '../ormconfig';
 import { ProductSpecification } from '../entity/ProductSpecification';
 import { mapSpec } from '../utils/mappers';
 import { ILike, Between } from 'typeorm';
-import { getImageList } from '../service/imageService';
+import { getImageListByIds } from '../utils/common';
 import { ProductVariantModel, ProductModel } from '../model/productModel';
 const router = express.Router();
 const productRepository = AppDataSource.getRepository(Product);
@@ -147,11 +147,5 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Failed to get product' });
   }
 });
-const getImageListByIds = async (imageIds: number[]) => {
-  const imageResponse: any = await getImageList(imageIds);
-  if (imageResponse.status !== 200) {
-    return null;
-  }
-  return imageResponse.data;
-};
+
 export default router;

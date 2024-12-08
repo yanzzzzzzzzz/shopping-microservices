@@ -2,6 +2,7 @@ import express from 'express';
 import { ProductVariant } from '../entity/ProductVariant';
 import { AppDataSource } from '../ormconfig';
 import { Product } from '../entity/Product';
+import { getImageListByIds } from '../utils/common';
 
 const router = express.Router();
 const productVariantRepository = AppDataSource.getRepository(ProductVariant);
@@ -89,5 +90,15 @@ router.get('/:productId/variants', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch product variants' });
   }
 });
-
+router.get('/:productId/variants/:variantId', async (req, res) => {
+  const { productId, variantId } = req.params;
+  const variant = await productVariantRepository.findOne({
+    where: { productId: parseInt(productId, 10), id: parseInt(variantId, 10) },
+  });
+  if (variant == null || variant?.imageId == null) {
+    return res.status(200).json(variant);
+  }
+  const imageUrl = await getImageListByIds([variant.imageId]);
+  res.status(200).json({ ...variant, imageUrl: imageUrl[variant.imageId] });
+});
 export default router;
